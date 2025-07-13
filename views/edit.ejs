@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post | SEO Blog</title>
+    <link rel="stylesheet" href="/styles.min.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/">SEO Blog</a></h1>
+        <p>Welcome, <%= user.username %>! <a href="/auth/logout">Logout</a></p>
+    </header>
+    <main>
+        <h2>Edit Post</h2>
+        <form action="/blog/edit/<%= post.slug %>" method="POST">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="<%= post.title %>" required>
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" required><%= post.content %></textarea>
+            <label for="metaTitle">Meta Title:</label>
+            <input type="text" id="metaTitle" name="metaTitle" value="<%= post.metaTitle %>">
+            <label for="metaDescription">Meta Description:</label>
+            <textarea id="metaDescription" name="metaDescription"><%= post.metaDescription %></textarea>
+            <label for="keywords">Keywords (comma-separated):</label>
+            <input type="text" id="keywords" name="keywords" value="<%= post.keywords.join(', ') %>">
+            <label for="ogTitle">Open Graph Title:</label>
+            <input type="text" id="ogTitle" name="ogTitle" value="<%= post.ogTitle %>">
+            <label for="ogDescription">Open Graph Description:</label>
+            <textarea id="ogDescription" name="ogDescription"><%= post.ogDescription %></textarea>
+            <label for="ogImage">Open Graph Image URL:</label>
+            <input type="text" id="ogImage" name="ogImage" value="<%= post.ogImage %>">
+            <label for="twitterTitle">Twitter Card Title:</label>
+            <input type="text" id="twitterTitle" name="twitterTitle" value="<%= post.twitterTitle %>">
+            <label for="twitterDescription">Twitter Card Description:</label>
+            <textarea id="twitterDescription" name="twitterDescription"><%= post.twitterDescription %></textarea>
+            <label for="twitterImage">Twitter Card Image URL:</label>
+            <input type="text" id="twitterImage" name="twitterImage" value="<%= post.twitterImage %>">
+            <button type="submit">Update</button>
+        </form>
+        <form action="/blog/delete/<%= post.slug %>" method="POST" style="margin-top: 10px;">
+            <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+        </form>
+    </main>
+</body>
+</html>

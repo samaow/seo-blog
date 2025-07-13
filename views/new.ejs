@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Post | SEO Blog</title>
+    <link rel="stylesheet" href="/styles.min.css">
+</head>
+<body>
+    <header>
+        <h1><a href="/">SEO Blog</a></h1>
+        <p>Welcome, <%= user.username %>! <a href="/auth/logout">Logout</a></p>
+    </header>
+    <main>
+        <h2>Create New Post</h2>
+        <form action="/blog" method="POST">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+            <label for="content">Content:</label>
+            <textarea id="content" name="content" required></textarea>
+            <label for="metaTitle">Meta Title:</label>
+            <input type="text" id="metaTitle" name="metaTitle">
+            <label for="metaDescription">Meta Description:</label>
+            <textarea id="metaDescription" name="metaDescription"></textarea>
+            <label for="keywords">Keywords (comma-separated):</label>
+            <input type="text" id="keywords" name="keywords">
+            <label for="ogTitle">Open Graph Title:</label>
+            <input type="text" id="ogTitle" name="ogTitle">
+            <label for="ogDescription">Open Graph Description:</label>
+            <textarea id="ogDescription" name="ogDescription"></textarea>
+            <label for="ogImage">Open Graph Image URL:</label>
+            <input type="text" id="ogImage" name="ogImage">
+            <label for="twitterTitle">Twitter Card Title:</label>
+            <input type="text" id="twitterTitle" name="twitterTitle">
+            <label for="twitterDescription">Twitter Card Description:</label>
+            <textarea id="twitterDescription" name="twitterDescription"></textarea>
+            <label for="twitterImage">Twitter Card Image URL:</label>
+            <input type="text" id="twitterImage" name="twitterImage">
+            <button type="submit">Publish</button>
+        </form>
+    </main>
+</body>
+</html>

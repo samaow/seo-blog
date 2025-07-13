@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+     <html lang="en">
+     <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title><%= post.metaTitle || post.title %> | SEO Blog</title>
+         <% if (post.metaDescription) { %>
+             <meta name="description" content="<%= post.metaDescription %>">
+         <% } %>
+         <% if (post.keywords && post.keywords.length > 0) { %>
+             <meta name="keywords" content="<%= post.keywords.join(', ') %>">
+         <% } %>
+         <meta property="og:title" content="<%= post.ogTitle %>">
+         <meta property="og:description" content="<%= post.ogDescription %>">
+         <meta property="og:type" content="article">
+         <% if (post.ogImage) { %>
+             <meta property="og:image" content="<%= post.ogImage %>">
+         <% } %>
+         <meta property="og:url" content="https://solid-umbrella-g4qx796vrgvv29r5g-3000.app.github.dev/<%= post.slug %>">
+         <meta property="og:site_name" content="SEO Blog">
+         <meta name="twitter:card" content="summary_large_image">
+         <meta name="twitter:title" content="<%= post.twitterTitle %>">
+         <meta name="twitter:description" content="<%= post.twitterDescription %>">
+         <% if (post.twitterImage) { %>
+             <meta name="twitter:image" content="<%= post.twitterImage %>">
+         <% } %>
+         <link rel="canonical" href="https://yourdomain.com/blog/<%= post.slug %>">
+         <script type="application/ld+json">
+         {
+             "@context": "https://schema.org",
+             "@type": "BlogPosting",
+             "headline": "<%= post.title %>",
+             "author": {
+                 "@type": "Person",
+                 "name": "<%= post.author.username %>"
+             },
+             "datePublished": "<%= post.date.toISOString() %>",
+             "description": "<%= post.metaDescription || post.content.substring(0, 200) %>",
+             "url": "https://yourdomain.com/blog/<%= post.slug %>",
+             <% if (post.ogImage) { %>
+             "image": "<%= post.ogImage %>",
+             <% } %>
+             "publisher": {
+                 "@type": "Organization",
+                 "name": "SEO Blog",
+                 "logo": {
+                     "@type": "ImageObject",
+                     "url": "https://yourdomain.com/logo.png"
+                 }
+             }
+         }
+         </script>
+         <link rel="stylesheet" href="/styles.min.css">
+     </head>
+    <body>
+         <header>
+             <h1><a href="/">SEO Blog</a></h1>
+             <% if (user) { %>
+                 <p>Welcome, <%= user.username %>! <a href="/auth/logout">Logout</a></p>
+             <% } else { %>
+                 <p><a href="/auth/login">Login</a> | <a href="/auth/register">Register</a></p>
+             <% } %>
+             <button id="dark-mode-toggle">Toggle Dark Mode</button>
+         </header>
+         <main>
+             <article>
+                 <h1><%= post.title %></h1>
+                 <p>By <%= post.author.username %> on <%= post.date.toDateString() %> - <%= post.views %> views</p>
+                 <% if (post.ogImage) { %>
+                     <img src="<%= post.ogImage %>" alt="Post image" loading="lazy" style="max-width: 100%;">
+                 <% } %>
+                 <div><%= post.content %></div>
+                 <% if (user && user._id.toString() === post.author.toString()) { %>
+                     <div style="margin-top: 20px;">
+                         <a href="/blog/edit/<%= post.slug %>">Edit</a>
+                         <form action="/blog/delete/<%= post.slug %>" method="POST" style="display: inline; margin-left: 10px;">
+                             <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                         </form>
+                     </div>
+                 <% } %>
+                 <div style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
+                     <h3>SEO Insights</h3>
+                     <p><strong>Top Keywords:</strong> <% post.keywordDensity.forEach(k => { %> <%= k.word %> ( <%= k.density %>% ), <% }); %></p>
+                     <p><strong>Readability Score:</strong> <%= post.readabilityScore %></p>
+                 </div>
+                 <% if (user) { %>
+                     <div style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
+                         <h3>Personalized for You</h3>
+                         <p>Hello <%= user.username %>! Thanks for contributing.</p>
+                         <% if (user._id.toString() === post.author.toString()) { %>
+                             <p>Your last post: <a href="/blog/<%= post.slug %>"><%= post.title %></a></p>
+                         <% } else { %>
+                             <p>Check out your own posts <a href="/">here</a>!</p>
+                         <% } %>
+                     </div>
+                 <% } %>
+                 <!-- Comment Section -->
+                 <div style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
+                     <h3>Comments</h3>
+                     <% if (comments && comments.length > 0) { %>
+                         <% comments.forEach(comment => { %>
+                             <p><strong><%= comment.author.username %></strong> (<%= comment.date.toDateString() %>): <%= comment.content %></p>
+                         <% }); %>
+                     <% } else { %>
+                         <p>No comments yet.</p>
+                     <% } %>
+                     <% if (user) { %>
+                         <form action="/blog/<%= post.slug %>/comments" method="POST">
+                             <label for="comment">Add a comment:</label>
+                             <textarea id="comment" name="content" required></textarea>
+                             <button type="submit">Submit</button>
+                         </form>
+                     <% } else { %>
+                         <p><a href="/auth/login">Log in</a> to add a comment.</p>
+                     <% } %>
+                 </div>
+                 <!-- Social Sharing Buttons -->
+                 <div style="margin-top: 20px;">
+                     <h3>Share This Post</h3>
+                     <a href="https://twitter.com/intent/tweet?url=https://yourdomain.com/blog/<%= post.slug %>&text=Check out <%= post.title %> by <%= post.author.username %> - SEO Blog" target="_blank" style="margin-right: 10px;">
+                         <button>Share on Twitter</button>
+                     </a>
+                     <a href="https://www.facebook.com/sharer/sharer.php?u=https://yourdomain.com/blog/<%= post.slug %>" target="_blank" style="margin-right: 10px;">
+                         <button>Share on Facebook</button>
+                     </a>
+                     <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://yourdomain.com/blog/<%= post.slug %>&title=<%= post.title %>&summary=<%= post.metaDescription || post.content.substring(0, 200) %>" target="_blank">
+                         <button>Share on LinkedIn</button>
+                     </a>
+                 </div>
+             </article>
+         </main>
+         <script>
+             document.getElementById('dark-mode-toggle').addEventListener('click', () => {
+                 document.body.classList.toggle('dark-mode');
+             });
+
+             window.addEventListener('scroll', () => {
+                 const scrollPosition = window.scrollY;
+                 const windowHeight = window.innerHeight;
+                 const documentHeight = document.body.scrollHeight;
+                 const scrollDepth = (scrollPosition + windowHeight) / documentHeight * 100;
+                 console.log(`Scroll Depth: ${scrollDepth.toFixed(2)}%`);
+             });
+         </script>
+     </body>
+     </html>
