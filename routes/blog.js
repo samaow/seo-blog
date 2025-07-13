@@ -6,6 +6,8 @@ const express = require('express');
      const Comment = require('../models/Comment');
      const Analytics = require('../models/Analytics');
      const Subscription = require('../models/Subscription');
+     const NodeCache = require('node-cache');
+     const cache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
 
      const router = express.Router();
 
@@ -31,6 +33,13 @@ const express = require('express');
 
      router.get('/:slug', async (req, res) => {
          try {
+             const cacheKey = `post_${req.params.slug}`;
+             const cached = cache.get(cacheKey);
+             if (cached) {
+                 console.log(`Serving ${req.params.slug} from cache`);
+                 return res.render('post', cached);
+             }
+
              const post = await BlogPost.findOne({ slug: req.params.slug }).populate('author', 'username');
              if (!post) return res.status(404).send('Post not found');
              const comments = await Comment.find({ post: post._id }).populate('author', 'username');
@@ -44,7 +53,9 @@ const express = require('express');
              await analytics.save();
              console.log(`Post ${post.title} viewed ${analytics.views} times`);
 
-             res.render('post', { post, user: req.user, comments });
+             const renderData = { post, user: req.user, comments };
+             cache.set(cacheKey, renderData);
+             res.render('post', renderData);
          } catch (err) {
              res.status(500).send('Server Error');
          }
@@ -105,6 +116,7 @@ const express = require('express');
              console.log('After save - Post slug:', post.slug);
 
              await User.findByIdAndUpdate(req.user._id, { lastPostSlug: post.slug });
+             cache.flushAll(); // Clear cache when a new post is created
 
              res.redirect(`/blog/${post.slug}`);
          } catch (err) {
@@ -149,6 +161,7 @@ const express = require('express');
              await post.save();
 
              await User.findByIdAndUpdate(req.user._id, { lastPostSlug: post.slug });
+             cache.del(`post_${post.slug}`); // Clear cache for edited post
 
              res.redirect(`/blog/${post.slug}`);
          } catch (err) {
@@ -162,6 +175,7 @@ const express = require('express');
              const post = await BlogPost.findOne({ slug: req.params.slug });
              if (!post || post.author.toString() !== req.user._id.toString()) return res.status(403).send('Unauthorized');
              await post.deleteOne();
+             cache.del(`post_${post.slug}`); // Clear cache for deleted post
              res.redirect('/');
          } catch (err) {
              res.status(500).send('Error deleting post');
@@ -180,6 +194,7 @@ const express = require('express');
                  content
              });
              await comment.save();
+             cache.del(`post_${post.slug}`); // Clear cache when a comment is added
              res.redirect(`/blog/${post.slug}`);
          } catch (err) {
              res.status(400).send('Error adding comment');
@@ -197,16 +212,15 @@ const express = require('express');
          }
      });
 
-     // Sitemap route
      router.get('/sitemap.xml', async (req, res) => {
          try {
              const posts = await BlogPost.find();
              let sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
              sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-             sitemap += '<url><loc>https://yourdomain.com/</loc><lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod><priority>1.0</priority></url>';
+             sitemap += '<url><loc>https://solid-umbrella-g4qx796vrgvv29r5g.github.dev/</loc><lastmod>' + new Date().toISOString().split('T')[0] + '</lastmod><priority>1.0</priority></url>';
              posts.forEach(post => {
                  sitemap += '<url>';
-                 sitemap += '<loc>https://yourdomain.com/blog/' + post.slug + '</loc>';
+                 sitemap += '<loc>https://solid-umbrella-g4qx796vrgvv29r5g.github.dev/blog/' + post.slug + '</loc>';
                  sitemap += '<lastmod>' + post.date.toISOString().split('T')[0] + '</lastmod>';
                  sitemap += '<priority>0.8</priority>';
                  sitemap += '</url>';

@@ -30,4 +30,6 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
+// require('./config/passport');
+
 module.exports = passport;
